@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PathaSaathi — Companion on the path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --parchment:#FAF0BE;--parchment-deep:#EBE1B0;--paper:#FFFDF5;
+    --ink:#1F1C16;--ink-soft:#4D473C;--ink-faint:#7E7769;
+    --rule:#DDD4A7;--beige:#BFA76F;
+    --olive:#4F5E45;--clay:#8A5A33;--plum:#6E5566;
+    --tile-forest-1:#3C4A38;--tile-forest-2:#2A3528;
+    --tile-clay-1:#6F4A2C;--tile-clay-2:#52351C;
+    --tile-plum-1:#564150;--tile-plum-2:#3D2D3A;
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--parchment);color:var(--ink);min-height:100vh;position:relative;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(120% 90% at 50% 8%, transparent 55%, rgba(60,52,38,.06) 100%);}
+  .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 40px;}
+  nav{display:flex;align-items:flex-end;justify-content:space-between;padding:34px 0 0;}
+  .brand .name{font-family:"DM Serif Display",serif;font-size:26px;color:var(--ink);}
+  .brand .sub{margin-top:6px;font-size:10.5px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-faint);}
+  .navlinks{display:flex;gap:30px;align-items:center;}
+  .navlinks a{font-size:14px;font-weight:500;color:var(--ink-soft);text-decoration:none;position:relative;padding-bottom:3px;transition:color .3s var(--ease);}
+  .navlinks a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:0;background:var(--ink);transition:width .4s var(--ease);}
+  .navlinks a:hover{color:var(--ink);}
+  .navlinks a:hover::after{width:100%;}
+  .hero{text-align:center;padding:84px 0 56px;}
+  .headline{font-family:"DM Serif Display",serif;font-weight:500;font-size:clamp(22px,3.2vw,36px);line-height:1.12;color:var(--ink);margin:0 auto;}
+  .subline{font-family:"DM Serif Display",serif;font-style:italic;font-size:clamp(16px,2vw,21px);color:var(--ink-soft);margin:26px auto 0;max-width:36ch;line-height:1.5;}
+  .prompt{display:flex;align-items:center;justify-content:center;gap:18px;margin:46px auto 0;max-width:560px;}
+  .prompt .line{height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--rule));}
+  .prompt .line.r{background:linear-gradient(90deg,var(--rule),transparent);}
+  .prompt span{font-size:11px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap;}
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:50px 0 0;}
+  .tile{position:relative;border-radius:6px;padding:38px 34px 34px;min-height:430px;display:flex;flex-direction:column;cursor:pointer;color:#F6F1E8;overflow:hidden;isolation:isolate;transition:transform .6s var(--ease),box-shadow .6s var(--ease),opacity .5s var(--ease);box-shadow:0 1px 2px rgba(30,26,18,.12),0 10px 26px -18px rgba(30,26,18,.45);border:none;text-align:left;font-family:inherit;}
+  .tile.t-forest{background:#FAF0BE;border:1.5px solid #1F1C16;}
+  .tile.t-forest::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#4F5E45;border-radius:6px 6px 0 0;}
+  .tile.t-clay{background:#FAF0BE;border:1.5px solid #1F1C16;}
+  .tile.t-clay::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#8A5A33;border-radius:6px 6px 0 0;}
+  .tile.t-plum{background:#FAF0BE;border:1.5px solid #1F1C16;}
+  .tile.t-plum::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#6E5566;border-radius:6px 6px 0 0;}
+  .tile .glow{position:absolute;top:-30%;left:50%;transform:translateX(-50%);width:120%;height:60%;z-index:-1;pointer-events:none;background:radial-gradient(60% 100% at 50% 0%,rgba(255,236,205,.42),transparent 70%);opacity:0;transition:opacity .6s var(--ease);}
+  .tile::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 30%);}
+  .tile .num{font-family:"DM Serif Display",serif;font-size:74px;line-height:1;color:rgba(31,28,22,.1);transition:color .6s var(--ease);}
+  .tile .winglabel{margin-top:18px;font-size:11px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;}
+  .tile.t-forest .winglabel{color:#4F5E45;font-weight:700;}
+  .tile.t-clay .winglabel{color:#8A5A33;font-weight:700;}
+  .tile.t-plum .winglabel{color:#6E5566;font-weight:700;}
+  .tile .q{font-family:"DM Serif Display",serif;font-size:clamp(22px,2.4vw,28px);line-height:1.24;margin-top:14px;color:#1F1C16;max-width:16ch;font-style:italic;}
+  .tile .spacer{flex:1;}
+  .tile .divider{height:1px;width:42px;background:#DDD4A7;transition:width .6s var(--ease),background .6s var(--ease);margin-bottom:18px;}
+  .tile .meta{display:flex;gap:14px;align-items:center;font-size:12px;color:#7E7769;margin-bottom:22px;}
+  .tile .meta b{color:#4D473C;font-weight:600;}
+  .tile .meta .sep{width:3px;height:3px;border-radius:50%;background:#DDD4A7;}
+  .tile .begin{display:inline-flex;align-items:center;gap:9px;font-size:14px;font-weight:600;color:#1F1C16;align-self:flex-start;}
+  .tile .begin .arrow{transition:transform .5s var(--ease);display:inline-block;}
+  .tile:hover{transform:translateY(-18px) scale(1.03);box-shadow:0 2px 4px rgba(30,26,18,.18),0 30px 60px -22px rgba(30,26,18,.65);border-color:#1F1C16;}
+  .tile:hover .glow{opacity:0;}
+  .tile:hover .num{color:rgba(31,28,22,.18);}
+  .tile:hover .divider{width:100%;background:#1F1C16;}
+  .tile:hover .begin .arrow{transform:translateX(6px);}
+  .tiles:hover .tile:not(:hover){opacity:.55;transform:scale(.985);}
+  .ground{height:14px;margin-top:30px;border-radius:3px;background:linear-gradient(180deg,#D8CFBC,#C9BFAA);}
+  .ground-shadow{height:34px;margin-top:-2px;background:radial-gradient(60% 100% at 50% 0%,rgba(30,26,18,.10),transparent 72%);}
+  footer{text-align:center;padding:48px 0 56px;font-size:12px;letter-spacing:.04em;color:var(--ink-faint);}
+  footer .fdot{color:var(--beige);padding:0 8px;}
+  @media(prefers-reduced-motion:no-preference){.reveal{opacity:0;transform:translateY(22px);}.reveal.in{opacity:1;transform:none;transition:opacity .9s var(--ease),transform .9s var(--ease);}}
+  .overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(35,30,22,.42);backdrop-filter:blur(7px);opacity:0;pointer-events:none;transition:opacity .45s var(--ease);}
+  .overlay.open{opacity:1;pointer-events:auto;}
+  .modal{width:min(620px,100%);background:var(--paper);border-radius:10px;box-shadow:0 40px 100px -30px rgba(30,26,18,.7);overflow:hidden;transform:translateY(20px) scale(.98);transition:transform .5s var(--ease);max-height:92vh;display:flex;flex-direction:column;}
+  .overlay.open .modal{transform:none;}
+  .modal-top{height:5px;width:100%;background:var(--olive);}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:24px 30px 0;}
+  .modal-head .wl{font-size:11px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-faint);}
+  .modal-head .title{font-family:"DM Serif Display",serif;font-size:19px;color:var(--ink);margin-top:3px;}
+  .closebtn{background:none;border:none;cursor:pointer;color:var(--ink-faint);width:34px;height:34px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .3s;flex:none;}
+  .closebtn:hover{background:var(--parchment-deep);color:var(--ink);}
+  .dots{display:flex;gap:7px;align-items:center;padding:18px 30px 0;flex-wrap:wrap;}
+  .dots .d{width:8px;height:8px;border-radius:50%;background:var(--rule);transition:all .35s var(--ease);}
+  .dots .d.done{background:var(--beige);}
+  .dots .d.active{transform:scale(1.45);}
+  .modal-body{padding:24px 30px 4px;overflow-y:auto;flex:1;}
+  .qstep .kicker{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px;}
+  .qstep .qtext{font-family:"DM Serif Display",serif;font-size:clamp(20px,3vw,26px);line-height:1.26;color:var(--ink);margin-bottom:22px;}
+  .qstep .empathy{font-size:13px;color:var(--ink-faint);font-style:italic;line-height:1.55;margin-bottom:16px;padding:12px 14px;background:var(--parchment);border-left:2px solid var(--rule);}
+  .opts{display:flex;flex-direction:column;gap:11px;}
+  .opt{text-align:left;width:100%;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:15px 18px;font-size:15px;color:var(--ink-soft);font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:13px;transition:border-color .25s,transform .2s,color .25s;}
+  .opt .mark{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--rule);flex:none;transition:all .25s;}
+  .opt:hover{border-color:var(--beige);transform:translateX(2px);color:var(--ink);}
+  .opt.sel{border-color:currentColor;}
+  .opt.sel .mark{border-color:currentColor;background:currentColor;box-shadow:inset 0 0 0 3.5px #fff;}
+  .wa-wrap{padding:6px 0 0;}
+  .wa-label{font-size:14px;color:var(--ink-soft);margin-bottom:8px;}
+  .wa-input{display:flex;align-items:center;border:1px solid var(--rule);border-radius:9px;overflow:hidden;background:#fff;transition:border-color .25s;margin-bottom:4px;}
+  .wa-input:focus-within{border-color:var(--ink-soft);}
+  .wa-input .cc{padding:15px 14px;font-size:15px;color:var(--ink-soft);background:var(--parchment);border-right:1px solid var(--rule);font-weight:600;}
+  .wa-input input{border:none;outline:none;flex:1;padding:15px 16px;font-size:16px;font-family:inherit;color:var(--ink);background:transparent;}
+  .wa-note{display:flex;gap:9px;align-items:flex-start;margin-top:12px;font-size:12.5px;line-height:1.5;color:var(--ink-faint);}
+  .name-input{width:100%;padding:13px 16px;border:1px solid var(--rule);border-radius:8px;font-family:inherit;font-size:15px;color:var(--ink);background:#fff;outline:none;margin-bottom:18px;transition:border-color .25s;}
+  .name-input:focus{border-color:var(--ink-soft);}
+  .modal-foot{display:flex;align-items:center;justify-content:space-between;padding:20px 30px 26px;gap:14px;border-top:1px solid var(--rule);margin-top:14px;}
+  .backbtn{background:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;color:var(--ink-faint);padding:8px 4px;transition:color .25s;}
+  .backbtn:hover{color:var(--ink);}
+  .backbtn[disabled]{opacity:0;pointer-events:none;}
+  .nextbtn{background:var(--ink);color:var(--paper);border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;padding:13px 26px;border-radius:999px;display:inline-flex;align-items:center;gap:9px;transition:background .3s,transform .2s,opacity .3s;}
+  .nextbtn:hover{transform:translateX(2px);}
+  .nextbtn[disabled]{opacity:.35;pointer-events:none;}
+  .nextbtn .arrow{transition:transform .4s var(--ease);}
+  .nextbtn:hover .arrow{transform:translateX(4px);}
+  .done-step{padding:46px 30px 50px;text-align:center;}
+  .done-seal{width:64px;height:64px;border-radius:50%;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--beige);color:var(--olive);animation:pop .6s var(--ease) both;}
+  @keyframes pop{0%{transform:scale(.4);opacity:0;}60%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+  .done-step h3{font-family:"DM Serif Display",serif;font-size:30px;color:var(--ink);font-weight:400;margin-bottom:12px;}
+  .done-step p{font-size:15px;color:var(--ink-soft);line-height:1.6;max-width:38ch;margin:0 auto 26px;}
+  .error-msg{color:#9b2335;font-size:13px;margin-top:10px;display:none;line-height:1.4;}
+  .error-msg.show{display:block;}
+  @media(max-width:880px){
+    .wrap{padding:0 24px;}
+    .tiles{grid-template-columns:1fr;gap:16px;}
+    .tile{min-height:auto;padding:30px 28px;}
+    .tile .num{font-size:60px;}
+    .tile .q{font-size:24px;max-width:none;}
+    .tiles:hover .tile:not(:hover){opacity:1;transform:none;}
+    .tile:hover{transform:translateY(-6px) scale(1.01);}
+    .navlinks{display:none;}
+    .hero{padding:56px 0 40px;}
+  }
+  @media(max-width:560px){
+    .modal-foot{padding:18px 22px 22px;}
+    .modal-body{padding:20px 22px 4px;}
+    .modal-head{padding:20px 22px 0;}
+    .dots{padding:16px 22px 0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="reveal">
+    <div class="brand">
+      <div class="name">PathaSaathi</div>
+      <div class="sub">पथसाथी · Companion on the path</div>
+    </div>
+    <div class="navlinks">
+      <a href="#wings">The Three Wings</a>
+      <a href="#" id="navStart">Begin</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1 class="headline reveal">
+      Simplify money<span style="color:var(--ink-faint);margin:0 .25em;font-weight:700;">·</span>Clarify career<span style="color:var(--ink-faint);margin:0 .25em;font-weight:700;">·</span>Reclaim life
+    </h1>
+    <p class="subline reveal">You don't build now to live later. You live along the way.</p>
+    <div class="prompt reveal">
+      <span class="line"></span>
+      <span>Choose the path that's calling you</span>
+      <span class="line r"></span>
+    </div>
+  </section>
+
+  <section class="tiles" id="wings">
+    <button class="tile t-forest reveal" data-wing="money">
+      <span class="glow"></span>
+      <span class="num">01</span>
+      <span class="winglabel">Money Wing</span>
+      <span class="q">Do you have a plan, or just a portfolio?</span>
+      <span class="spacer"></span>
+      <span class="divider"></span>
+      <span class="meta"><b>Money Clarity Score</b><span class="sep"></span><span>Free · 3 questions</span></span>
+      <span class="begin">Enter this wing <span class="arrow">→</span></span>
+    </button>
+    <button class="tile t-clay reveal" data-wing="career">
+      <span class="glow"></span>
+      <span class="num">02</span>
+      <span class="winglabel">Career Wing</span>
+      <span class="q">Doing well isn't the same as doing right.</span>
+      <span class="spacer"></span>
+      <span class="divider"></span>
+      <span class="meta"><b>Career Compass</b><span class="sep"></span><span>Free · 14 questions</span></span>
+      <span class="begin">Enter this wing <span class="arrow">→</span></span>
+    </button>
+    <button class="tile t-plum reveal" data-wing="life">
+      <span class="glow"></span>
+      <span class="num">03</span>
+      <span class="winglabel">Life Wing</span>
+      <span class="q">Something feels off, but you can't name it.</span>
+      <span class="spacer"></span>
+      <span class="divider"></span>
+      <span class="meta"><b>Life Clarity Score</b><span class="sep"></span><span>Free · 11 questions</span></span>
+      <span class="begin">Enter this wing <span class="arrow">→</span></span>
+    </button>
+  </section>
+
+  <div class="ground reveal"></div>
+  <div class="ground-shadow"></div>
+
+  <footer class="reveal">
+    PathaSaathi<span class="fdot">·</span>Simplify money. Clarify career. Reclaim life.
+  </footer>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-top" id="modalTop"></div>
+    <div class="modal-head">
+      <div>
+        <div class="wl" id="mWing"></div>
+        <div class="title" id="mTitle"></div>
+      </div>
+      <button class="closebtn" id="closeBtn" aria-label="Close">✕</button>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="modal-body" id="mBody"></div>
+    <div class="modal-foot" id="mFoot">
+      <button class="backbtn" id="backBtn">← Back</button>
+      <button class="nextbtn" id="nextBtn">Continue <span class="arrow">→</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const API = "https://pathasaathi-build-production.up.railway.app";
+
+  const WINGS = {
+    money:{
+      label:"Money Wing", color:"#4F5E45",
+      questions:[
+        {k:"Your financial journey", q:"Where are you right now?",
+         opts:["Building — SIP running, corpus under ₹50L","Growing — corpus ₹50L–2Cr, SIP active","Preserving — corpus ₹2Cr+, SIP reducing","Drawdown — corpus built, withdrawing or planning to"],
+         vals:["building","growing","preserving","drawdown"], key:"q1"},
+        {k:"Monthly SIP", q:"Approximate monthly SIP right now:",
+         opts:["Under ₹25,000","₹25,000 – ₹75,000","₹75,000 – ₹2,00,000","Above ₹2,00,000","No active SIP"],
+         vals:["under_25k","25k_75k","75k_200k","above_200k","no_sip"], key:"q2"},
+        {k:"Time horizon", q:"Years to your Financial Independence target:",
+         opts:["Under 3 years","3–7 years","7–15 years","15+ years","Haven't calculated yet"],
+         vals:["under_3","3_to_7","7_to_15","15_plus","not_calculated"], key:"q3"}
+      ]
+    },
+    career:{
+      label:"Career Wing", color:"#8A5A33",
+      questions:[
+        {k:"Block 1 — Legacy Discovery", q:"A peer gets recognised for work you contributed to. Honest reaction?",
+         opts:["Irritation — I deserved that credit","Indifference — recognition isn't why I do this","Mild envy but mostly fine","Motivation — I want to build something where that's mine"],
+         vals:["irritation","indifference","mild_envy","motivation"], key:"q1"},
+        {k:"Sunday evening…", q:"What occupies your mind about Monday?",
+         opts:["Specific problems I'm looking forward to solving","Nothing specific — just routine","Meetings and politics I have to manage","My side project, not my job","Not applicable — not currently in a role"],
+         vals:["looking_forward","routine","meetings_politics","side_project","not_applicable"], key:"q2"},
+        {k:"Most alive moment…", q:"What was your most alive professional moment in the last 12 months?",
+         free:true, placeholder:"One line — first thing that comes to mind", key:"q3"},
+        {k:"Your distinctive contribution…", q:"What do you know or do that most people in your field don't — and that you wish more valued?",
+         free:true, placeholder:"Don't overthink it", key:"q4"},
+        {k:"The legacy sentence…", q:"If someone who worked closely with you described you to a stranger in 10 years — what would you want them to say?",
+         free:true, placeholder:"Write it as if they're already saying it", key:"q5"},
+        {k:"The life bridge…", q:"If you got 10 hours back each week — where would they actually go?",
+         opts:["Back into career — skills, visibility, side projects","Into family — present, not just physically there","Into health — exercise, sleep, mental space","Into something I've been postponing","Honestly, I don't know anymore"],
+         vals:["back_into_career","family","health","postponed_thing","dont_know"], key:"q6"},
+        {k:"Trade-off reveal…", q:"If you could only optimise for one thing in the next 3 years:",
+         opts:["More recognition and visibility","More meaning and impact","More financial security","More freedom to choose my work"],
+         vals:["recognition","meaning","security","freedom"], key:"q7"},
+        {k:"Block 2 — Sustainability", q:"Energy at work right now — honest 1 to 10.",
+         opts:["1–3 · Running on empty","4–5 · Getting by","6–7 · Okay","8–10 · Genuinely good"],
+         vals:["2","4","7","9"], key:"q8"},
+        {k:"Career shape…", q:"Which best describes your career path?",
+         opts:["Continuous — same field or company","Had a break — still figuring out what's next","Had a break — back now","One job a long time — haven't moved"],
+         vals:["continuous","had_break_figuring_out","had_break_back_now","one_job_long_time"], key:"q9"},
+        {k:"Block 3 — FI Reality Check", q:"Do you have a Financial Independence number?",
+         opts:["Yes, precisely","Rough idea","Never calculated it"],
+         vals:["yes_precisely","rough_idea","never_calculated"], key:"q10"},
+        {k:"The runway…", q:"Years to that number at your current savings rate:",
+         opts:["Under 3 years","3–7 years","7–12 years","12+ years or don't know"],
+         vals:["under_3","3_to_7","7_to_12","12_plus"], key:"q11"},
+        {k:"Honest self-assessment…", q:"Do you believe you're on track for FI?",
+         opts:["Yes — confident","Roughly","Probably not but haven't faced it","No — and it worries me"],
+         vals:["confident","roughly","probably_not","no_worries"], key:"q12"},
+        {k:"Explored moving on?", q:"Have you actively explored moving on from your current role?",
+         opts:["Yes — couldn't find the right fit","Yes — found something I'm pursuing","No","Not applicable"],
+         vals:["yes_couldnt_find_fit","yes_found_something","no","not_applicable"], key:"q13"},
+        {k:"Block 4 — Optionality", q:"Are you building anything outside your job?",
+         opts:["Yes — actively","Yes — early stages","Thinking about it","No"],
+         vals:["yes_actively","yes_early_stages","thinking_about_it","no"], key:"q15"}
+      ]
+    },
+    life:{
+      label:"Life Wing", color:"#6E5566",
+      questions:[
+        {k:"Care load", q:"In an average week, how much of your mental load goes into managing things for other people — children, parents, household?",
+         opts:["Very little — mostly managing myself","Some — a background presence","Significant — takes real time and energy","Overwhelming — it's the dominant thing"],
+         vals:["very_little","some","significant","overwhelming"], key:"care_load"},
+        {k:"Family & Relationships",
+         empathy:"At this stage, family often gets the time that's left over rather than the time that's planned. That's not failure — that's the default.",
+         q:"Current state — honest read.",
+         opts:["Working well — no active problems","Ticking along — stable, no crises","Needs attention — something is off","In trouble — genuinely struggling here"],
+         vals:["working_well","ticking_along","needs_attention","in_trouble"], key:"d1_state"},
+        {k:"Family & Relationships", q:"How much control do you have over this right now?",
+         opts:["Fully in control","Mostly in control","Partially in control","Not in control"],
+         vals:["fully_in_control","mostly_in_control","partially_in_control","not_in_control"], key:"d1_control"},
+        {k:"Health & Energy",
+         empathy:"Most people in demanding careers are running on a health deficit they plan to fix later. Later has a way of arriving as a crisis rather than a choice.",
+         q:"Current state — honest read.",
+         opts:["Working well — no active problems","Ticking along — stable, no crises","Needs attention — something is off","In trouble — genuinely struggling here"],
+         vals:["working_well","ticking_along","needs_attention","in_trouble"], key:"d2_state"},
+        {k:"Health & Energy", q:"How much control do you have over this right now?",
+         opts:["Fully in control","Mostly in control","Partially in control","Not in control"],
+         vals:["fully_in_control","mostly_in_control","partially_in_control","not_in_control"], key:"d2_control"},
+        {k:"Personal Goals",
+         empathy:"This is the domain most people quietly abandon in their 40s — not dramatically, just gradually.",
+         q:"Current state — honest read.",
+         opts:["Actively pursuing something","Not forgotten, not moving","Gathering dust","Feels like I've given up"],
+         vals:["actively_pursuing","not_forgotten","gathering_dust","given_up"], key:"d3_state"},
+        {k:"Personal Goals", q:"How much control do you have over this right now?",
+         opts:["Fully in control","Mostly in control","Partially in control","Not in control"],
+         vals:["fully_in_control","mostly_in_control","partially_in_control","not_in_control"], key:"d3_control"},
+        {k:"Money & Security", q:"Current state — honest read.",
+         opts:["Working well — no active problems","Ticking along — stable, no crises","Needs attention — something is off","In trouble — genuinely struggling here"],
+         vals:["working_well","ticking_along","needs_attention","in_trouble"], key:"d4_state"},
+        {k:"Money & Security", q:"How much control do you have over this right now?",
+         opts:["Fully in control","Mostly in control","Partially in control","Not in control"],
+         vals:["fully_in_control","mostly_in_control","partially_in_control","not_in_control"], key:"d4_control"},
+        {k:"Career & Purpose", q:"Current state — honest read.",
+         opts:["Working well — no active problems","Ticking along — stable, no crises","Needs attention — something is off","In trouble — genuinely struggling here"],
+         vals:["working_well","ticking_along","needs_attention","in_trouble"], key:"d5_state"},
+        {k:"Career & Purpose", q:"How much control do you have over this right now?",
+         opts:["Fully in control","Mostly in control","Partially in control","Not in control"],
+         vals:["fully_in_control","mostly_in_control","partially_in_control","not_in_control"], key:"d5_control"}
+      ]
+    }
+  };
+
+  const overlay=document.getElementById('overlay'),modalTop=document.getElementById('modalTop'),
+    mWing=document.getElementById('mWing'),mTitle=document.getElementById('mTitle'),
+    dots=document.getElementById('dots'),mBody=document.getElementById('mBody'),
+    mFoot=document.getElementById('mFoot'),backBtn=document.getElementById('backBtn'),
+    nextBtn=document.getElementById('nextBtn'),closeBtn=document.getElementById('closeBtn');
+
+  let current=null,step=0,answers={},phone="",name="";
+
+  function openWing(k){
+    current=k;step=0;answers={};phone="";name="";
+    const w=WINGS[k];
+    modalTop.style.background=w.color;
+    mWing.textContent=w.label;
+    overlay.classList.add('open');
+    document.body.style.overflow='hidden';
+    render();
+  }
+  function closeModal(){
+    overlay.classList.remove('open');
+    document.body.style.overflow='';
+  }
+  function buildDots(){
+    const total=WINGS[current].questions.length+1;
+    dots.innerHTML='';
+    for(let i=0;i<total;i++){
+      const d=document.createElement('span');
+      d.className='d'+(i<step?' done':'')+(i===step?' active':'');
+      dots.appendChild(d);
+    }
+  }
+
+  async function submitQuiz(){
+    const digits=phone.replace(/\D/g,'');
+    const payload={...answers,phone:'+91'+digits};
+    if(name) payload.name=name;
+    nextBtn.disabled=true;
+    nextBtn.innerHTML='Sending… <span class="arrow">→</span>';
+    try{
+      const res=await fetch(API+'/quiz/'+current,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
+      if(res.ok){ showDone(WINGS[current]); }
+      else{
+        const err=await res.json().catch(()=>({}));
+        showSubmitError(err.error||'Something went wrong. Please try again.');
+      }
+    }catch(e){
+      showSubmitError('Connection error. Please check your network and try again.');
+    }
+  }
+
+  function showDone(w){
+    mTitle.textContent='Thank you';
+    dots.style.display='none';
+    mFoot.style.display='none';
+    mBody.innerHTML=`<div class="done-step">
+      <div class="done-seal"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <div style="display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;"><span style="width:11px;height:11px;border-radius:50%;background:${w.color};display:inline-block;"></span>${w.label}</div>
+      <h3>On its way.</h3>
+      <p>Your report will arrive on WhatsApp shortly. Take your time reading it — it's written for you, not at you.</p>
+      <button class="nextbtn" id="doneClose" style="margin:0 auto;">Close <span class="arrow">→</span></button>
+    </div>`;
+    document.getElementById('doneClose').onclick=closeModal;
+  }
+
+  function showSubmitError(msg){
+    nextBtn.disabled=false;
+    nextBtn.innerHTML='Try again <span class="arrow">→</span>';
+    let el=document.getElementById('submitErr');
+    if(!el){el=document.createElement('div');el.id='submitErr';el.className='error-msg';mBody.appendChild(el);}
+    el.textContent=msg;el.className='error-msg show';
+  }
+
+  function render(){
+    const w=WINGS[current];
+    const qn=w.questions.length;
+    dots.style.display='flex';mFoot.style.display='flex';
+    buildDots();backBtn.disabled=(step===0);
+
+    if(step===qn){
+      mTitle.textContent='One last thing';
+      nextBtn.innerHTML='Send my report <span class="arrow">→</span>';
+      backBtn.disabled=false;
+      mBody.innerHTML=`<div class="qstep">
+        <div class="kicker">Where shall we send your report?</div>
+        <div class="qtext" style="font-size:clamp(18px,2.4vw,22px);">Your analysis — delivered to WhatsApp.</div>
+        <div class="wa-wrap">
+          <div class="wa-label">Your name (optional)</div>
+          <input class="name-input" id="nameInp" type="text" placeholder="First name" value="${name}" />
+          <div class="wa-label">Your WhatsApp number</div>
+          <div class="wa-input">
+            <span class="cc">+91</span>
+            <input id="phoneInp" type="tel" inputmode="numeric" placeholder="98765 43210" maxlength="11" value="${phone}" autocomplete="off" />
+          </div>
+          <div class="wa-note">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;opacity:.7;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Your number is only used to deliver your report. Reply STOP anytime.</span>
+          </div>
+        </div>
+      </div>`;
+      const pi=document.getElementById('phoneInp'),ni=document.getElementById('nameInp');
+      function val(){phone=pi.value;name=ni.value.trim();nextBtn.disabled=pi.value.replace(/\D/g,'').length<10;}
+      pi.addEventListener('input',val);ni.addEventListener('input',val);
+      val();setTimeout(()=>pi.focus(),120);
+      return;
+    }
+
+    const Q=w.questions[step];
+    mTitle.textContent='Question '+(step+1)+' of '+qn;
+    nextBtn.innerHTML='Continue <span class="arrow">→</span>';
+
+    if(Q.free){
+      const saved=answers[Q.key]||'';
+      mBody.innerHTML=`<div class="qstep">
+        <div class="kicker">${Q.k}</div>
+        <div class="qtext">${Q.q}</div>
+        <textarea id="freeText" rows="3" placeholder="${Q.placeholder||''}" style="width:100%;margin-top:8px;padding:14px 16px;border:1px solid var(--rule);border-radius:8px;font-family:inherit;font-size:15px;color:var(--ink);background:#fff;resize:none;outline:none;line-height:1.5;transition:border-color .25s">${saved}</textarea>
+      </div>`;
+      const ta=document.getElementById('freeText');
+      ta.addEventListener('input',()=>{answers[Q.key]=ta.value.trim();nextBtn.disabled=!ta.value.trim();});
+      ta.addEventListener('focus',()=>ta.style.borderColor=w.color);
+      ta.addEventListener('blur',()=>ta.style.borderColor='var(--rule)');
+      nextBtn.disabled=!saved;
+      setTimeout(()=>ta.focus(),120);
+    } else {
+      const cur=answers[Q.key];
+      const emp=Q.empathy?`<div class="empathy">${Q.empathy}</div>`:'';
+      mBody.innerHTML=`<div class="qstep">
+        <div class="kicker">${Q.k}</div>
+        <div class="qtext">${Q.q}</div>
+        ${emp}
+        <div class="opts">${Q.opts.map((o,i)=>{
+          const v=Q.vals[i],sel=cur===v;
+          return `<button class="opt${sel?' sel':''}" data-v="${v}" style="${sel?'color:'+w.color:''}""><span class="mark"></span>${o}</button>`;
+        }).join('')}</div>
+      </div>`;
+      mBody.querySelectorAll('.opt').forEach(b=>{
+        b.onclick=()=>{
+          answers[Q.key]=b.dataset.v;
+          mBody.querySelectorAll('.opt').forEach(x=>{x.classList.remove('sel');x.style.color='';});
+          b.classList.add('sel');b.style.color=w.color;nextBtn.disabled=false;
+        };
+      });
+      nextBtn.disabled=(cur===undefined);
+    }
+  }
+
+  nextBtn.onclick=()=>{
+    if(step===WINGS[current].questions.length){submitQuiz();}
+    else{step++;render();}
+  };
+  backBtn.onclick=()=>{if(step>0){step--;render();}};
+  closeBtn.onclick=closeModal;
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))closeModal();});
+  document.querySelectorAll('.tile').forEach(t=>t.addEventListener('click',()=>openWing(t.dataset.wing)));
+  document.getElementById('navStart').addEventListener('click',e=>{e.preventDefault();openWing('money');});
+
+  const revealEls=[...document.querySelectorAll('.reveal')];
+  function revealEl(el){
+    if(el.classList.contains('in'))return;
+    const delay=el.classList.contains('tile')?[...document.querySelectorAll('.tile')].indexOf(el)*90:0;
+    setTimeout(()=>el.classList.add('in'),delay);
+  }
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting){revealEl(e.target);io.unobserve(e.target);}});},{threshold:.12});
+    revealEls.forEach(el=>io.observe(el));
+  }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    revealEls.forEach(el=>{if(el.getBoundingClientRect().top<window.innerHeight*.95)revealEl(el);});
+  }));
+  setTimeout(()=>revealEls.forEach(revealEl),1200);
+})();
+</script>
+</body>
+</html>
