@@ -174,7 +174,7 @@
       <span class="q">Do you have a plan, or just a portfolio?</span>
       <span class="spacer"></span>
       <span class="divider"></span>
-      <span class="meta"><b>Money Clarity Score</b><span class="sep"></span><span>Free · 3 questions</span></span>
+      <span class="meta"><b>Money Clarity Score</b><span class="sep"></span><span>Free · 5 questions</span></span>
       <span class="begin">Enter this wing <span class="arrow">→</span></span>
     </button>
     <button class="tile t-clay reveal" data-wing="career">
@@ -235,15 +235,21 @@
     money:{
       label:"Money Wing", color:"#4F5E45",
       questions:[
-        {k:"Your financial journey", q:"Where are you right now?",
-         opts:["Building — SIP running, corpus under ₹50L","Growing — corpus ₹50L–2Cr, SIP active","Preserving — corpus ₹2Cr+, SIP reducing","Drawdown — corpus built, withdrawing or planning to"],
-         vals:["building","growing","preserving","drawdown"], key:"q1"},
-        {k:"Monthly SIP", q:"Approximate monthly SIP right now:",
+        {k:"Your portfolio", q:"Your current investment portfolio — approximate total value:",
+         opts:["Under ₹25L","₹25L – ₹75L","₹75L – ₹2Cr","₹2Cr – ₹5Cr","₹5Cr+"],
+         vals:["under_25L","25L_75L","75L_2Cr","2Cr_5Cr","5Cr_plus"], key:"q1"},
+        {k:"Monthly SIP", q:"Approximate monthly SIP or fresh investment amount:",
          opts:["Under ₹25,000","₹25,000 – ₹75,000","₹75,000 – ₹2,00,000","Above ₹2,00,000","No active SIP"],
          vals:["under_25k","25k_75k","75k_200k","above_200k","no_sip"], key:"q2"},
-        {k:"Time horizon", q:"Years to your Financial Independence target:",
-         opts:["Under 3 years","3–7 years","7–15 years","15+ years","Haven't calculated yet"],
-         vals:["under_3","3_to_7","7_to_15","15_plus","not_calculated"], key:"q3"}
+        {k:"FI target", q:"Do you have a number in mind for financial independence?",
+         opts:["Under ₹3Cr","₹3Cr – ₹7Cr","₹7Cr – ₹15Cr","₹15Cr+","Haven’t calculated a number yet"],
+         vals:["under_3Cr","3Cr_7Cr","7Cr_15Cr","15Cr_plus","not_calculated"], key:"q3"},
+        {k:"Crash readiness", q:"If markets dropped 30% tomorrow — honest first reaction:",
+         opts:["I have a plan for this — I’d follow it","Uneasy but I’d sit tight and wait","I’d probably make changes I’d regret later","I haven’t thought about what I’d do"],
+         vals:["has_plan","sit_tight","would_panic","no_plan"], key:"q4"},
+        {k:"Income stability", q:"Your primary income source right now:",
+         opts:["Employment — stable and predictable","Employment — but I can see changes coming","Running my own business or consulting","Between opportunities right now"],
+         vals:["stable","changes_coming","entrepreneur","between_opportunities"], key:"q5"}
       ]
     },
     career:{
@@ -271,8 +277,8 @@
          opts:["1–3 · Running on empty","4–5 · Getting by","6–7 · Okay","8–10 · Genuinely good"],
          vals:["2","4","7","9"], key:"q8"},
         {k:"Career shape…", q:"Which best describes your career path?",
-         opts:["Continuous — same field or company","Had a break — still figuring out what's next","Had a break — back now","One job a long time — haven't moved"],
-         vals:["continuous","had_break_figuring_out","had_break_back_now","one_job_long_time"], key:"q9"},
+         opts:["Continuous — no significant breaks, steady progression","One job, long time — 5+ years, growth has slowed","Several moves, all forward — multiple roles, building well","Several moves, mixed — some forward, some lateral","Had a break — and returned to work","Had a break — still figuring out how to return","Currently in a transition or between things","Running my own business or consulting practice"],
+         vals:["continuous","one_job_long_time","several_moves_forward","several_moves_mixed","had_break_back_now","had_break_figuring_out","in_transition","entrepreneur"], key:"q9"},
         {k:"Block 3 — FI Reality Check", q:"Do you have a Financial Independence number?",
          opts:["Yes, precisely","Rough idea","Never calculated it"],
          vals:["yes_precisely","rough_idea","never_calculated"], key:"q10"},
@@ -283,8 +289,8 @@
          opts:["Yes — confident","Roughly","Probably not but haven't faced it","No — and it worries me"],
          vals:["confident","roughly","probably_not","no_worries"], key:"q12"},
         {k:"Explored moving on?", q:"Have you actively explored moving on from your current role?",
-         opts:["Yes — couldn't find the right fit","Yes — found something I'm pursuing","No","Not applicable"],
-         vals:["yes_couldnt_find_fit","yes_found_something","no","not_applicable"], key:"q13"},
+         opts:["No — haven't needed to","No — but I think about it","Yes — and found something worth moving to","Yes — but couldn't find the right fit","Yes — and decided to stay by choice"],
+         vals:["no_not_needed","no_but_thinking","yes_found_something","yes_couldnt_find_fit","yes_stayed_by_choice"], key:"q13"},
         {k:"Block 4 — Optionality", q:"Are you building anything outside your job?",
          opts:["Yes — actively","Yes — early stages","Thinking about it","No"],
          vals:["yes_actively","yes_early_stages","thinking_about_it","no"], key:"q15"}
@@ -320,7 +326,9 @@
         {k:"Personal Goals", q:"How much control do you have over this right now?",
          opts:["Fully in control","Mostly in control","Partially in control","Not in control"],
          vals:["fully_in_control","mostly_in_control","partially_in_control","not_in_control"], key:"d3_control"},
-        {k:"Money & Security", q:"Current state — honest read.",
+        {k:"Money & Security",
+         empathy:"For most people at this stage, money stress isn’t about the amount — it’s about not having a structure they trust. The feeling of ‘is this enough?’ can sit quietly alongside a portfolio that’s actually growing.",
+         q:"Current state — honest read.",
          opts:["Working well — no active problems","Ticking along — stable, no crises","Needs attention — something is off","In trouble — genuinely struggling here"],
          vals:["working_well","ticking_along","needs_attention","in_trouble"], key:"d4_state"},
         {k:"Money & Security", q:"How much control do you have over this right now?",
